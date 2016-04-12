@@ -1,4 +1,4 @@
-package danquinndesign.com.smartsweepers.utils;
+package danquinndesign.com.smartsweepers.geneticalgorithm;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -24,13 +24,30 @@ public class GeneticAlgorithm {
     }
 
     /** Fitness function parameters */
-    public String[] params;
+    public final String[] params;
 
     /** Mapping of parameters to their binary representation */
     public Map<BitSet, String> paramMap;
 
     /** Function used to guage fitness of a chromosome */
-    public FitnessFunction fitnessFunction;
+    public final FitnessFunction fitnessFunction;
+
+    /** Sort individuals in population by fitness score */
+    private static final class MemberComparator implements Comparator<String> {
+        private GeneticAlgorithm ga;
+
+        public MemberComparator(GeneticAlgorithm ga) {
+            this.ga = ga;
+        }
+
+        public int compare(String member1, String member2) {
+            double f1 = ga.getFitness(member1);
+            double f2 = ga.getFitness(member2);
+            if (f2 < f1) { return -1; }
+            if (f2 > f1) { return 1; }
+            return 0;
+        }
+    }
 
     /** Accepts comma separated list of possible parameters and a fitness function */
 
@@ -134,27 +151,11 @@ public class GeneticAlgorithm {
     public ArrayList<String> evolve(ArrayList<String> population) {
         ArrayList<String> newPopulation = new ArrayList(population.size());
 
-        class MemberComparator implements Comparator<String> {
-            private GeneticAlgorithm ga;
-
-            public MemberComparator(GeneticAlgorithm ga) {
-                this.ga = ga;
-            }
-
-            public int compare(String member1, String member2) {
-                double f1 = ga.getFitness(member1);
-                double f2 = ga.getFitness(member2);
-                if (f2 < f1) { return -1; }
-                if (f2 > f1) { return 1; }
-                return 0;
-            }
-        }
-
         // Sort population by fitness
 
         Collections.sort(population, new MemberComparator(this));
 
-        for (int i = 0; i < population.size() / 2; i += 1) {
+        for (int i = 0; i < (population.size() - 2) / 2; i += 1) {
             String member1 = population.get((int)Math.floor(Math.random() * population.size() / (Math.random() + 1)));
             String member2 = population.get((int)Math.floor(Math.random() * population.size() / (Math.random() + 1)));
 
@@ -176,6 +177,11 @@ public class GeneticAlgorithm {
             newPopulation.add(member1);
             newPopulation.add(member2);
         }
+
+        // Keep the most fit members of the last generation to avoid regression
+
+        newPopulation.add(population.get(0));
+        newPopulation.add(population.get(1));
 
         return newPopulation;
     }
@@ -200,7 +206,6 @@ public class GeneticAlgorithm {
         ArrayList<String> solution = null;
         double maxFitness = 0;
         int tries = 0;
-
 
         // Evolve a population until we run out of tries or find an individual with a fitness of 1
 

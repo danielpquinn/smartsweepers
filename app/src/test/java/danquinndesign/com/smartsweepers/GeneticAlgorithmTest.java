@@ -4,10 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Map;
 
-import danquinndesign.com.smartsweepers.utils.GeneticAlgorithm;
+import danquinndesign.com.smartsweepers.geneticalgorithm.GeneticAlgorithm;
 
 import static org.junit.Assert.*;
 
@@ -27,6 +25,9 @@ public class GeneticAlgorithmTest {
             int total = -1;
             int lastInt = -1;
             String lastOperation = "";
+            String lastType = "";
+            int alternations = 0;
+            double score;
 
             for (int i = 0; i < args.size(); i += 1) {
                 if (total == -1) {
@@ -44,15 +45,17 @@ public class GeneticAlgorithmTest {
 
                 try {
                     currentInt = Integer.parseInt(args.get(i));
+                    if (lastType == "string") { alternations += 1; }
+                    lastType = "int";
                 } catch (NumberFormatException e) {
                     currentOperation = args.get(i);
+                    if (lastType == "int") { alternations += 1; }
+                    lastType = "string";
                 }
 
                 if (currentOperation != "") {
                     lastOperation = currentOperation;
-                }
-
-                if (lastOperation != "" && currentInt != -1) {
+                } else if (lastOperation != "" && currentInt != -1) {
                     lastInt = currentInt;
                 }
 
@@ -76,7 +79,13 @@ public class GeneticAlgorithmTest {
                 }
             }
 
-            return (42d - Math.abs(42d - (double)total)) / 42d;
+            score = (42d - Math.abs(42d - (double)total)) / 42d;
+
+            // Give a higher score to sequences that contain alternations
+
+            score += (1 - score) * (alternations / args.size());
+
+            return score;
         }
     };
 
@@ -119,7 +128,7 @@ public class GeneticAlgorithmTest {
 
     @Test
     public void solve() throws Exception {
-        ArrayList<String> solution = ga.solve(1000, 40, 7);
+        ArrayList<String> solution = ga.solve(50, 200, 7);
         System.out.println(solution);
         assertEquals(1, 1);
     }
