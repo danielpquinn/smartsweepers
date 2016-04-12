@@ -2,6 +2,8 @@ package danquinndesign.com.smartsweepers.utils;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,9 +12,15 @@ import java.util.Map;
  */
 public class GeneticAlgorithm {
 
+    /** Rate at which two chromosomes will swap their bits */
+    static final double CROSSOVER_RATE = 0.7;
+
+    /** Rate at which mutation occurs */
+    static final double MUTATION_RATE = 0.001;
+
     /** Fitness function, accepts any number of arguments and returns a fitness score */
     public interface FitnessFunction {
-        int execute(ArrayList<String> arguments);
+        double execute(ArrayList<String> arguments);
     }
 
     /** Fitness function parameters */
@@ -98,7 +106,118 @@ public class GeneticAlgorithm {
 
     /** Get the fitness of a chromosome */
 
-    public int getFitness(String chromosome) {
+    public double getFitness(String chromosome) {
         return fitnessFunction.execute(decode(chromosome));
+    }
+
+    /** Randomly generate a population */
+
+    public ArrayList<String> generatePopulation(int size, int paramLength) {
+        int bitLength = getBitLengthToEncodeParams();
+        ArrayList<String> population = new ArrayList<>();
+
+        for (int i = 0; i < size; i += 1) {
+            String message = "";
+            for (int j = 0; j < paramLength; j += 1) {
+                for (int k = 0; k < bitLength; k += 1) {
+                    message += Math.random() < 0.5 ? "0" : "1";
+                }
+            }
+            population.add(message);
+        }
+
+        return population;
+    }
+
+    /** Evolve a population */
+
+    public ArrayList<String> evolve(ArrayList<String> population) {
+        ArrayList<String> newPopulation = new ArrayList(population.size());
+
+        class MemberComparator implements Comparator<String> {
+            private GeneticAlgorithm ga;
+
+            public MemberComparator(GeneticAlgorithm ga) {
+                this.ga = ga;
+            }
+
+            public int compare(String member1, String member2) {
+                double f1 = ga.getFitness(member1);
+                double f2 = ga.getFitness(member2);
+                if (f2 < f1) { return -1; }
+                if (f2 > f1) { return 1; }
+                return 0;
+            }
+        }
+
+        // Sort population by fitness
+
+        Collections.sort(population, new MemberComparator(this));
+
+        for (int i = 0; i < population.size() / 2; i += 1) {
+            String member1 = population.get((int)Math.floor(Math.random() * population.size() / (Math.random() + 1)));
+            String member2 = population.get((int)Math.floor(Math.random() * population.size() / (Math.random() + 1)));
+
+            // Swap bits after random point if crossover rate is exceeded
+
+            if (Math.random() < CROSSOVER_RATE) {
+                for (int j = (int)Math.floor(Math.random() * member1.length()); j < member1.length() - 1; j += 1) {
+                    char temp = member1.charAt(j);
+                    member1 = member1.substring(0, j) + member2.charAt(j) + member1.substring(j + 1);
+                    member2 = member2.substring(0, j) + temp + member2.substring(j + 1);
+                }
+            }
+
+            // Mutate
+
+            member1 = mutate(member1);
+            member2 = mutate(member2);
+
+            newPopulation.add(member1);
+            newPopulation.add(member2);
+        }
+
+        return newPopulation;
+    }
+
+    /** Mutate a chromosome */
+
+    static String mutate(String chromosome) {
+
+        for (int i = 0; i < chromosome.length(); i += 1) {
+            if (Math.random() < MUTATION_RATE) {
+                chromosome = chromosome.substring(0, i) + (chromosome.charAt(i) == '0' ? "1" : "0") + chromosome.substring(i + 1);
+            }
+        }
+
+        return chromosome;
+    }
+
+    /** Evolve until a member has a fitness score of one */
+
+    public ArrayList<String> solve(int maxTries, int populationSize, int parameterLength) {
+        ArrayList<String> population = generatePopulation(populationSize, parameterLength);
+        ArrayList<String> solution = null;
+        double maxFitness = 0;
+        int tries = 0;
+
+
+        // Evolve a population until we run out of tries or find an individual with a fitness of 1
+
+        while (maxFitness < 1 && tries < maxTries) {
+            population = evolve(population);
+            maxFitness = getFitness(population.get(0));
+            tries += 1;
+        }
+
+        if (maxFitness == 1) {
+            solution = decode(population.get(0));
+        }
+
+        return solution;
+    }
+
+    public ArrayList<String> solve() {
+        return solve(100, 10, 5);
     }
 }
