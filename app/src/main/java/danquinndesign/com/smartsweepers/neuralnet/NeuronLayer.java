@@ -1,4 +1,4 @@
-package danquinndesign.com.smartsweepers.nerualnet;
+package danquinndesign.com.smartsweepers.neuralnet;
 
 import java.util.ArrayList;
 

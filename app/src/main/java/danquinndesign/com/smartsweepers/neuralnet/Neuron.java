@@ -1,4 +1,4 @@
-package danquinndesign.com.smartsweepers.nerualnet;
+package danquinndesign.com.smartsweepers.neuralnet;
 
 /**
  * Created by danquinn on 4/12/16.

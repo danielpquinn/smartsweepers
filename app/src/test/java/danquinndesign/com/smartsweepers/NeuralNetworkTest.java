@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
-import danquinndesign.com.smartsweepers.nerualnet.NeuralNet;
+import danquinndesign.com.smartsweepers.neuralnet.NeuralNet;
 
 import static junit.framework.Assert.*;
 
