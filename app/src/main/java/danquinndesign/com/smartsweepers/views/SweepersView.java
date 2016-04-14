@@ -5,6 +5,8 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import danquinndesign.com.smartsweepers.objects.SweepersScene;
+
 /**
  * Displays sweepers and targets
  */
@@ -25,7 +27,7 @@ public class SweepersView extends SurfaceView implements SurfaceHolder.Callback 
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-        mSweepersThread = new SweepersThread(getHolder(), this, mSweepersScene);
+        mSweepersThread = new SweepersThread(getHolder(), mSweepersScene);
         mSweepersThread.setRunning(true);
         mSweepersThread.start();
     }

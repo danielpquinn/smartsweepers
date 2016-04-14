@@ -10,6 +10,7 @@ public class Sweepers extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().hide();
         SweepersView view = new SweepersView(this);
         setContentView(view);
     }

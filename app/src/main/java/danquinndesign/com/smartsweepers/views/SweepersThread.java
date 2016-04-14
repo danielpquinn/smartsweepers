@@ -1,9 +1,10 @@
 package danquinndesign.com.smartsweepers.views;
 
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.util.Log;
 import android.view.SurfaceHolder;
+
+import danquinndesign.com.smartsweepers.objects.SweepersScene;
 
 /**
  * Handles drawing loop
@@ -17,18 +18,14 @@ public class SweepersThread extends Thread {
     /** Surface holder from surface view */
     private SurfaceHolder mSurfaceHolder;
 
-    /** View that instantiates this thread */
-    private SweepersView mSweepersView;
-
     /** Scene responsible for drawing screen */
     private SweepersScene mSweepersScene;
 
     /** Allows us to start or stop this thread from outside */
     private boolean mRunning = false;
 
-    public SweepersThread(SurfaceHolder surfaceHolder, SweepersView sweepersView, SweepersScene sweepersScene) {
+    public SweepersThread(SurfaceHolder surfaceHolder, SweepersScene sweepersScene) {
         mSurfaceHolder = surfaceHolder;
-        mSweepersView = sweepersView;
         mSweepersScene = sweepersScene;
     }
 

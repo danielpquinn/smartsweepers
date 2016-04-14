@@ -1,14 +1,13 @@
-package danquinndesign.com.smartsweepers.views;
+package danquinndesign.com.smartsweepers.objects;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 
 /**
  * A single sweeper
  */
 public class Sweeper {
-    private static final String TAG = "Sweeper";
 
     /** Sweeper position */
     private float mX;
@@ -22,6 +21,9 @@ public class Sweeper {
     private float mWidth;
     private float mHeight;
 
+    /** Fitness increments each time a mine is encountered */
+    private int mFitness;
+
     /** Paint styles */
     private Paint mPaint;
 
@@ -30,10 +32,11 @@ public class Sweeper {
         mY = 0;
         mVX = 0;
         mVY = 0;
+        mFitness = 0;
         mWidth = 30;
         mHeight = 30;
         mPaint = new Paint();
-        mPaint.setARGB(255, 255, 255, 255);
+        mPaint.setColor(Color.parseColor("#03A9F4"));
     }
 
     /** Move sweeper */
@@ -46,7 +49,13 @@ public class Sweeper {
     /** Draw sweeper onto canvas */
 
     public void draw(Canvas canvas) {
-        canvas.drawRect(mX, mY, mX + mWidth, mY + mHeight, mPaint);
+        canvas.drawCircle(mX + mWidth / 2, mY + mHeight / 2, mWidth / 2, mPaint);
+    }
+
+    /** Bump up fitness level when sweeper finds a mine */
+
+    public void findMine() {
+        mFitness += 1;
     }
 
     /** Getters and setters */
@@ -70,6 +79,14 @@ public class Sweeper {
 
     public float getHeight() {
         return mHeight;
+    }
+
+    public void setWidth(float width) {
+        mWidth = width;
+    }
+
+    public void setHeight(float height) {
+        mHeight= height;
     }
 
     public float getVX() {
