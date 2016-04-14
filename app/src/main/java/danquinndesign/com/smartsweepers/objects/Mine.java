@@ -24,7 +24,7 @@ public class Mine {
         mWidth = 20;
         mHeight = 20;
         mPaint = new Paint();
-        mPaint.setColor(Color.parseColor("#CDDC39"));
+        mPaint.setColor(Color.parseColor("#007D82"));
     }
 
     /** Draw the mine onto a canvas */

@@ -14,9 +14,9 @@ import java.util.Comparator;
 public class SweepersScene {
     private static final String TAG = "SweepersScene";
 
-    private static final int NUM_SWEEPERS = 30;
-    private static final int NUM_MINES= 10;
-    private static final int BG_COLOR = Color.parseColor("#607D8B");
+    private static final int NUM_SWEEPERS = 10;
+    private static final int NUM_MINES= 50;
+    private static final int BG_COLOR = Color.parseColor("#00ABB2");
 
     /** List of sweepers */
     private ArrayList<Sweeper> mSweepers;
@@ -31,9 +31,13 @@ public class SweepersScene {
     private int mWidth;
     private int mHeight;
 
+    /** Current generation */
+    private int mGeneration;
+
     public SweepersScene() {
         mSweepers = new ArrayList();
         mMines = new ArrayList();
+        mGeneration = 0;
 
         for (int i = 0; i < NUM_MINES; i += 1) {
             Mine mine = new Mine();
@@ -141,7 +145,15 @@ public class SweepersScene {
         newSweepers.add(mSweepers.get(0));
         newSweepers.add(mSweepers.get(1));
 
+        // Mutate sweeper's weights randomly to introduce new behavior
+
+        for (Sweeper sweeper: mSweepers) {
+            sweeper.mutateWeights();
+        }
+
         mSweepers = newSweepers;
+
+        mGeneration += 1;
     }
 
     /** Combine two sweepers */
@@ -184,5 +196,11 @@ public class SweepersScene {
             mine.move((float)Math.random() * mWidth, (float)Math.random() * mHeight);
         }
         mMineQuadTree = new MineQuadTree(0, 0, mWidth, mHeight, mMines);
+    }
+
+    /** Getters and setters */
+
+    public int getGeneration() {
+        return mGeneration;
     }
 }

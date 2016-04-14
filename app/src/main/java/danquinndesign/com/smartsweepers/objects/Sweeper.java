@@ -39,7 +39,7 @@ public class Sweeper {
          * Output is number between -1 and 1 which determines rotation.
          */
 
-        mNeuralNet = new NeuralNet(2, 2, 1, 3);
+        mNeuralNet = new NeuralNet(2, 2, 2, 3);
 
         mX = 0;
         mY = 0;
@@ -47,7 +47,7 @@ public class Sweeper {
         mWidth = 30;
         mHeight = 30;
         mPaint = new Paint();
-        mPaint.setColor(Color.parseColor("#03A9F4"));
+        mPaint.setColor(Color.parseColor("#29F6FF"));
     }
 
     /** Update direction based on distance from nearest mine */
@@ -80,6 +80,19 @@ public class Sweeper {
     public void move(float x, float y) {
         mX = x;
         mY = y;
+    }
+
+    /** Mutate weights in neural net at random */
+
+    public void mutateWeights() {
+        ArrayList<Float> weights = mNeuralNet.getWeights();
+        ArrayList<Float> newWeights = new ArrayList();
+
+        for (Float weight: weights) {
+            newWeights.add(Math.random() < 0.01 ? (float)Math.random() : weight);
+        }
+
+        mNeuralNet.setWeights(newWeights);
     }
 
     /** Draw sweeper onto canvas */

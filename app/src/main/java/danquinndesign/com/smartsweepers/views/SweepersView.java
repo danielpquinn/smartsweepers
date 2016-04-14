@@ -37,10 +37,6 @@ public class SweepersView extends SurfaceView implements SurfaceHolder.Callback 
 
     /** Genreate next generation */
 
-    public void nextGeneration() {
-        mSweepersScene.nextGeneration();
-    }
-
     private void init() {
         mSweepersScene = new SweepersScene();
         getHolder().addCallback(this);
@@ -70,5 +66,11 @@ public class SweepersView extends SurfaceView implements SurfaceHolder.Callback 
                 Log.e(TAG, e.getMessage());
             }
         }
+    }
+
+    /** Getters and setters */
+
+    public SweepersScene getSweepersScene() {
+        return mSweepersScene;
     }
 }
