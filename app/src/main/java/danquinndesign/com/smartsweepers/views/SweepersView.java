@@ -1,6 +1,7 @@
 package danquinndesign.com.smartsweepers.views;
 
 import android.content.Context;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -21,6 +22,26 @@ public class SweepersView extends SurfaceView implements SurfaceHolder.Callback 
 
     public SweepersView(Context context) {
         super(context);
+        init();
+    }
+
+    public SweepersView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
+
+    public SweepersView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        init();
+    }
+
+    /** Genreate next generation */
+
+    public void nextGeneration() {
+        mSweepersScene.nextGeneration();
+    }
+
+    private void init() {
         mSweepersScene = new SweepersScene();
         getHolder().addCallback(this);
     }

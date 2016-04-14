@@ -3,19 +3,24 @@ package danquinndesign.com.smartsweepers.objects;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
+
+import java.util.ArrayList;
+
+import danquinndesign.com.smartsweepers.neuralnet.NeuralNet;
 
 /**
  * A single sweeper
  */
 public class Sweeper {
+    private static final String TAG = "Sweeper";
+
+    /** Brain! */
+    private NeuralNet mNeuralNet;
 
     /** Sweeper position */
     private float mX;
     private float mY;
-
-    /** Sweeper velocity */
-    private float mVX;
-    private float mVY;
 
     /** Dimensions of sweeper */
     private float mWidth;
@@ -28,15 +33,46 @@ public class Sweeper {
     private Paint mPaint;
 
     public Sweeper() {
+
+        /*
+         * Two inputs are x and y distance to nearest mine.
+         * Output is number between -1 and 1 which determines rotation.
+         */
+
+        mNeuralNet = new NeuralNet(2, 2, 1, 3);
+
         mX = 0;
         mY = 0;
-        mVX = 0;
-        mVY = 0;
         mFitness = 0;
         mWidth = 30;
         mHeight = 30;
         mPaint = new Paint();
         mPaint.setColor(Color.parseColor("#03A9F4"));
+    }
+
+    /** Update direction based on distance from nearest mine */
+
+    public void react(ArrayList<Mine> mines, float width, float height) {
+        double minDist = 1000000;
+        Mine closestMine = mines.get(0);
+
+        for (Mine mine: mines) {
+            float distX = mX - mine.getX();
+            float distY = mY - mine.getY();
+            double dist = Math.sqrt(distX * distX + distY * distY);
+            if (dist < minDist) {
+                minDist = dist;
+                closestMine = mine;
+            }
+        }
+
+        float[] inputs = { mX - closestMine.getX(), mY - closestMine.getY() };
+        float[] outputs = mNeuralNet.getOutput(inputs);
+
+        float moveX = outputs[0] * 10 - 5;
+        float moveY = outputs[1] * 10 - 5;
+
+        move(mX + moveX, mY + moveY);
     }
 
     /** Move sweeper */
@@ -68,11 +104,6 @@ public class Sweeper {
         return mY;
     }
 
-    public void setVelocity(float x, float y) {
-        mVX = x;
-        mVY = y;
-    }
-
     public float getWidth() {
         return mWidth;
     }
@@ -81,19 +112,11 @@ public class Sweeper {
         return mHeight;
     }
 
-    public void setWidth(float width) {
-        mWidth = width;
+    public int getFitness() {
+        return mFitness;
     }
 
-    public void setHeight(float height) {
-        mHeight= height;
-    }
-
-    public float getVX() {
-        return mVX;
-    }
-
-    public float getVY() {
-        return mVY;
+    public NeuralNet getNeuralNet() {
+        return mNeuralNet;
     }
 }

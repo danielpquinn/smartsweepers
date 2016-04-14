@@ -13,9 +13,8 @@ public class NeuralNet {
     public NeuralNet(int numInputs, int numOutputs, int numHiddenLayers, int numNeuronsPerHiddenLayer) {
 
         // Generate input layer.
-        // TODO: Assuming for now that the input layer should have one input per neuron...
 
-        mLayers.add(new NeuronLayer(numInputs, 1));
+        mLayers.add(new NeuronLayer(numInputs, numInputs));
 
         // Generate hidden layers. First hidden layer should have as many inputs
         // as the number of neurons in the input layer. Each consecutive hidden layer
@@ -39,26 +38,28 @@ public class NeuralNet {
 
     /** Get output from network */
 
-    public double[] getOutput() {
+    public float[] getOutput(float[] inputs) {
 
         // First batch of outputs will be the length of inputs to the neural net.
 
-        double[] outputs = new double[mLayers.get(0).getNeurons().size()];
+        float[] outputs = inputs;
 
-        // Iterate over hidden layers
+        // Iterate over layers
 
-        for (int i = 1; i < mLayers.size(); i += 1) {
+        for (int i = 0; i < mLayers.size(); i += 1) {
 
-            double[] inputs = outputs;
+            ArrayList<Neuron> neurons = mLayers.get(i).getNeurons();
 
-            outputs = new double[mLayers.get(i).getNeurons().size()];
+            inputs = outputs;
 
-            for (int j = 1; j < mLayers.get(i).getNeurons().size(); j += 1) {
+            outputs = new float[neurons.size()];
+
+            for (int j = 0; j < neurons.size(); j += 1) {
 
                 // Sum up each input multiplied by it's corresponding weight
 
-                double sum = 0;
-                double[] weights = mLayers.get(i).getNeurons().get(j).getWeights();
+                float sum = 0;
+                float[] weights = neurons.get(j).getWeights();
 
                 for (int k = 0; k < inputs.length; k += 1) {
                     sum += inputs[k] * weights[k];
@@ -80,27 +81,38 @@ public class NeuralNet {
 
     /** Sigmoid function used to generate output for each neuron */
 
-    private static double Sigmoid(double t) {
-        return t / (1 + Math.pow(Math.E, t * -1));
+    public static float Sigmoid(float a) {
+        return (float)(1 / (1 + Math.pow(Math.E, 100 * a * -1)));
     }
 
     /** Get an array of all weights in hidden layers */
 
-    public ArrayList<Double> getWeights() {
-        ArrayList<Double> weights = new ArrayList();
+    public ArrayList<Float> getWeights() {
+        ArrayList<Float> weights = new ArrayList();
 
         for (int i = 1; i < mLayers.size(); i += 1) {
-
             for (int j = 0; j < mLayers.get(i).getNeurons().size(); j += 1) {
-
-                // TODO: Do I include bias here? Leaving it out for now.
-
-                for (int k = 0; k < mLayers.get(i).getNeurons().get(j).getWeights().length - 1; k += 1) {
+                for (int k = 0; k < mLayers.get(i).getNeurons().get(j).getWeights().length; k += 1) {
                     weights.add(mLayers.get(i).getNeurons().get(j).getWeights()[k]);
                 }
             }
         }
 
         return weights;
+    }
+
+    /** Set weights of all connections */
+
+    public void setWeights(ArrayList<Float> weights) {
+        int currentWeight = 0;
+
+        for (int i = 1; i < mLayers.size(); i += 1) {
+            for (int j = 0; j < mLayers.get(i).getNeurons().size(); j += 1) {
+                for (int k = 0; k < mLayers.get(i).getNeurons().get(j).getWeights().length; k += 1) {
+                    mLayers.get(i).getNeurons().get(j).getWeights()[k] = weights.get(currentWeight);
+                    currentWeight += 1;
+                }
+            }
+        }
     }
 }

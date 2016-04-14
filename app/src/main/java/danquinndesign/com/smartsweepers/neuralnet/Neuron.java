@@ -1,12 +1,12 @@
 package danquinndesign.com.smartsweepers.neuralnet;
 
 /**
- * Created by danquinn on 4/12/16.
+ * Individual neuron
  */
 public class Neuron {
 
     /** Weight of each incoming edge */
-    private double[] mWeights;
+    private float[] mWeights;
 
     public Neuron(int numInputs) {
 
@@ -14,18 +14,18 @@ public class Neuron {
         // We include it here because we want to evolve it just like
         // the other weights coming into the neuron.
 
-        mWeights = new double[numInputs + 1];
+        mWeights = new float[numInputs + 1];
 
         // Add a random weight for each input
 
         for (int i = 0; i < numInputs; i += 1) {
-            mWeights[i] = Math.random();
+            mWeights[i] = (float)(Math.random() * 2 - 1);
         }
     }
 
     /** Get weights for neuron */
 
-    public double[] getWeights() {
+    public float[] getWeights() {
         return mWeights;
     }
 }

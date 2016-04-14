@@ -38,9 +38,31 @@ public class NeuralNetworkTest {
 
         // Check for correct output length
 
-        double[] output = net.getOutput();
+        float[] inputs = { -1, -1 };
+        float[] outputs = net.getOutput(inputs);
+        for (float output: outputs) { System.out.println(output); }
 
-        assertEquals(1, output.length);
+        inputs[0] = (float)-0.5;
+        inputs[1] = (float)-0.5;
+        outputs = net.getOutput(inputs);
+        for (float output: outputs) { System.out.println(output); }
+
+        inputs[0] = 0;
+        inputs[1] = 0;
+        outputs = net.getOutput(inputs);
+        for (float output: outputs) { System.out.println(output); }
+
+        inputs[0] = (float)0.5;
+        inputs[1] = (float)0.5;
+        outputs = net.getOutput(inputs);
+        for (float output: outputs) { System.out.println(output); }
+
+        inputs[0] = 1;
+        inputs[1] = 1;
+        outputs = net.getOutput(inputs);
+        for (float output: outputs) { System.out.println(output); }
+
+        assertEquals(1, outputs.length);
     }
 
     @Test
@@ -48,7 +70,7 @@ public class NeuralNetworkTest {
 
         // Check for correct weights length
 
-        ArrayList<Double> weights = net.getWeights();
-        assertEquals(9, weights.size());
+        ArrayList<Float> weights = net.getWeights();
+        assertEquals(13, weights.size());
     }
 }

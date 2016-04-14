@@ -31,15 +31,14 @@ public class MineQuadTree {
         mY = y;
         mWidth = width;
         mHeight = height;
-        mMines = new ArrayList();
+        mMines = mines;
 
         ArrayList<Mine> minesNW = new ArrayList();
         ArrayList<Mine> minesNE = new ArrayList();
         ArrayList<Mine> minesSW = new ArrayList();
         ArrayList<Mine> minesSE = new ArrayList();
 
-        if (mines.size() == 1 || samePositions(mines)) {
-            for (Mine mine: mines) { mMines.add(mine); }
+        if (mines.size() < 10 || samePositions(mines)) {
             return;
         }
 

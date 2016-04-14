@@ -5,8 +5,8 @@ import android.graphics.Color;
 import android.util.Log;
 
 import java.util.ArrayList;
-
-import danquinndesign.com.smartsweepers.objects.Sweeper;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Manages scene objects and does main render loop
@@ -14,7 +14,7 @@ import danquinndesign.com.smartsweepers.objects.Sweeper;
 public class SweepersScene {
     private static final String TAG = "SweepersScene";
 
-    private static final int NUM_SWEEPERS = 10;
+    private static final int NUM_SWEEPERS = 30;
     private static final int NUM_MINES= 10;
     private static final int BG_COLOR = Color.parseColor("#607D8B");
 
@@ -42,9 +42,8 @@ public class SweepersScene {
 
         for (int i = 0; i < NUM_SWEEPERS; i += 1) {
             Sweeper sweeper = new Sweeper();
-            sweeper.setVelocity((float)Math.random() * 10, (float)Math.random() * 10);
             mSweepers.add(sweeper);
-            sweeper.move((int)(Math.random() * 100), (int)(Math.random() * 100));
+            sweeper.move((int)(Math.random() * mWidth), (int)(Math.random() * mHeight));
         }
     }
 
@@ -52,47 +51,46 @@ public class SweepersScene {
 
     public void update() {
         for (Sweeper sweeper: mSweepers) {
-            if (sweeper.getX() + sweeper.getWidth() > mWidth) {
-                sweeper.setVelocity(sweeper.getVX() * -1, sweeper.getVY());
-            } else if (sweeper.getY() + sweeper.getHeight() > mHeight) {
-                sweeper.setVelocity(sweeper.getVX(), sweeper.getVY() * -1);
-            } else if (sweeper.getX() < 0) {
-                sweeper.setVelocity(sweeper.getVX() * -1, sweeper.getVY());
-            } else if (sweeper.getY() < 0) {
-                sweeper.setVelocity(sweeper.getVX(), sweeper.getVY() * -1);
-            }
-            sweeper.move(sweeper.getX() + sweeper.getVX(), sweeper.getY() + sweeper.getVY());
-            checkCollision(sweeper, mMineQuadTree);
+            if (sweeper.getX() < 0) { sweeper.move(mWidth, sweeper.getY()); }
+            if (sweeper.getX() > mWidth) { sweeper.move(0, sweeper.getY()); }
+            if (sweeper.getY() < 0) { sweeper.move(sweeper.getX(), mHeight); }
+            if (sweeper.getY() > mHeight) { sweeper.move(sweeper.getX(), 0); }
+            compareObjects(sweeper, mMineQuadTree);
         }
     }
 
     /** Detect collisions between sweeper and mine */
 
-    private void checkCollision(Sweeper sweeper, MineQuadTree quadTree) {
+    private void compareObjects(Sweeper sweeper, MineQuadTree quadTree) {
+
+        if (quadTree == null) {
+            Log.d(TAG, "Quad tree is null :(");
+            return;
+        }
 
         // drill into overlapping quad trees
 
         if (sweeper.getX() < quadTree.getX() + quadTree.getWidth() / 2) {
             if (sweeper.getY() < quadTree.getY() + quadTree.getHeight() / 2) {
                 if (quadTree.getNW() != null) {
-                    checkCollision(sweeper, quadTree.getNW());
+                    compareObjects(sweeper, quadTree.getNW());
                     return;
                 }
             } else {
                 if (quadTree.getSW() != null) {
-                    checkCollision(sweeper, quadTree.getSW());
+                    compareObjects(sweeper, quadTree.getSW());
                     return;
                 }
             }
         } else {
             if (sweeper.getY() < quadTree.getY() + quadTree.getHeight() / 2) {
                 if (quadTree.getNE() != null) {
-                    checkCollision(sweeper, quadTree.getNE());
+                    compareObjects(sweeper, quadTree.getNE());
                     return;
                 }
             } else {
                 if (quadTree.getSE() != null) {
-                    checkCollision(sweeper, quadTree.getSE());
+                    compareObjects(sweeper, quadTree.getSE());
                     return;
                 }
             }
@@ -101,25 +99,80 @@ public class SweepersScene {
         for (Mine mine: quadTree.getMines()) {
             if (mine.getX() < sweeper.getX() + sweeper.getWidth() && mine.getX() + mine.getWidth() > sweeper.getX()) {
                 if (mine.getY() < sweeper.getY() + sweeper.getHeight() && mine.getY() + mine.getHeight() > sweeper.getY()) {
-                    sweeper.setWidth(sweeper.getWidth() + 5);
-                    sweeper.setHeight(sweeper.getHeight() + 5);
+                    sweeper.findMine();
                     mine.move((float)Math.random() * mWidth, (float)Math.random() * mHeight);
                     mMineQuadTree = new MineQuadTree(0, 0, mWidth, mHeight, mMines);
                 }
             }
         }
+
+        sweeper.react(quadTree.getMines(), mWidth, mHeight);
+    }
+
+    /** Create the next generation */
+
+    public void nextGeneration() {
+
+        ArrayList<Sweeper> newSweepers = new ArrayList();
+
+        // Sort sweepers by fitness
+
+        Comparator byFitness = new Comparator<Sweeper>() {
+            @Override
+            public int compare(Sweeper s1, Sweeper s2) {
+            return s2.getFitness() - s1.getFitness();
+            }
+        };
+
+        Collections.sort(mSweepers, byFitness);
+
+        // Create new new individuals from fittest members of population
+
+        for (int i = 0; i < mSweepers.size() - 2; i += 1) {
+            Sweeper s1 = mSweepers.get((int)Math.floor(Math.random() * mSweepers.size() * Math.random()));
+            Sweeper s2 = mSweepers.get((int)Math.floor(Math.random() * mSweepers.size() * Math.random()));
+            Sweeper newSweeper = combineSweepers(s1, s2);
+            newSweeper.move((float)Math.random() * mWidth, (float)Math.random() * mHeight);
+            newSweepers.add(newSweeper);
+        }
+
+        // Keep top performing sweepers from each generation
+
+        newSweepers.add(mSweepers.get(0));
+        newSweepers.add(mSweepers.get(1));
+
+        mSweepers = newSweepers;
+    }
+
+    /** Combine two sweepers */
+
+    private static Sweeper combineSweepers(Sweeper s1, Sweeper s2) {
+        Sweeper newSweeper = new Sweeper();
+
+        // Create a new set of weights that is a combination of s1 and s2 weights
+
+        ArrayList<Float> s1Weights = s1.getNeuralNet().getWeights();
+        ArrayList<Float> s2Weights = s2.getNeuralNet().getWeights();
+
+        int crossover = (int)Math.floor(Math.random() * s1Weights.size());
+
+        ArrayList<Float> newWeights = new ArrayList();
+
+        for (int j = 0; j < s1Weights.size(); j += 1) {
+            newWeights.add(j < crossover ? s1Weights.get(j) : s2Weights.get(j));
+        }
+
+        newSweeper.getNeuralNet().setWeights(newWeights);
+
+        return newSweeper;
     }
 
     /** Draw sweepers onto canvas */
 
     public void draw(Canvas canvas) {
         canvas.drawColor(BG_COLOR);
-        for (Mine mine: mMines) {
-            mine.draw(canvas);
-        }
-        for (Sweeper sweeper: mSweepers) {
-            sweeper.draw(canvas);
-        }
+        for (Mine mine: mMines) { mine.draw(canvas); }
+        for (Sweeper sweeper: mSweepers) { sweeper.draw(canvas); }
     }
 
     /** Set dimensions */
