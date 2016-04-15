@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import danquinndesign.com.smartsweepers.views.SweepersView;
@@ -24,20 +25,20 @@ public class Sweepers extends AppCompatActivity {
 
         mSweepersView = (SweepersView)findViewById(R.id.sweepers_view);
         mTextGeneration = (TextView)findViewById(R.id.text_generation);
-        mTextGeneration.setText("Generation 0");
+        mTextGeneration.setText("Generation 1");
     }
 
     /** Reset */
 
     public void onResetClick(View view) {
-        mSweepersView.surfaceDestroyed(mSweepersView.getHolder());
-        mSweepersView.surfaceCreated(mSweepersView.getHolder());
+        mSweepersView.stopThread();
+        mSweepersView.createScene();
     }
 
     /** Create next generation of sweepers */
 
     public void onNextGenerationClick(View view) {
         mSweepersView.getSweepersScene().nextGeneration();
-        mTextGeneration.setText("Generation " + mSweepersView.getSweepersScene().getGeneration());
+        mTextGeneration.setText("Generation " + (mSweepersView.getSweepersScene().getGeneration() + 1));
     }
 }

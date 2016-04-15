@@ -7,6 +7,8 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Manages scene objects and does main render loop
@@ -14,8 +16,8 @@ import java.util.Comparator;
 public class SweepersScene {
     private static final String TAG = "SweepersScene";
 
-    private static final int NUM_SWEEPERS = 10;
-    private static final int NUM_MINES= 50;
+    private static final int NUM_SWEEPERS = 50;
+    private static final int NUM_MINES= 10;
     private static final int BG_COLOR = Color.parseColor("#00ABB2");
 
     /** List of sweepers */
@@ -34,6 +36,20 @@ public class SweepersScene {
     /** Current generation */
     private int mGeneration;
 
+    /** New generation timer */
+
+    private class GenerationTimer extends TimerTask {
+        private SweepersScene mScene;
+
+        public GenerationTimer(SweepersScene scene) {
+            mScene = scene;
+        }
+
+        public void run() {
+            mScene.nextGeneration();
+        }
+    }
+
     public SweepersScene() {
         mSweepers = new ArrayList();
         mMines = new ArrayList();
@@ -49,6 +65,9 @@ public class SweepersScene {
             mSweepers.add(sweeper);
             sweeper.move((int)(Math.random() * mWidth), (int)(Math.random() * mHeight));
         }
+
+        Timer timer = new Timer();
+        timer.schedule(new GenerationTimer(this), 0, 20000);
     }
 
     /** Update positions of sweepers */
@@ -66,11 +85,6 @@ public class SweepersScene {
     /** Detect collisions between sweeper and mine */
 
     private void compareObjects(Sweeper sweeper, MineQuadTree quadTree) {
-
-        if (quadTree == null) {
-            Log.d(TAG, "Quad tree is null :(");
-            return;
-        }
 
         // drill into overlapping quad trees
 
@@ -110,7 +124,7 @@ public class SweepersScene {
             }
         }
 
-        sweeper.react(quadTree.getMines(), mWidth, mHeight);
+        sweeper.react(quadTree.getMines());
     }
 
     /** Create the next generation */

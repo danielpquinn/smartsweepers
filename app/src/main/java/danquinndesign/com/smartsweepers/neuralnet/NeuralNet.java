@@ -7,10 +7,15 @@ import java.util.ArrayList;
  */
 public class NeuralNet {
 
+    /** Slope of sigmoid curve */
+    private float mSigmoidSlope;
+
     /** Collection of layers */
     private ArrayList<NeuronLayer> mLayers = new ArrayList();
 
     public NeuralNet(int numInputs, int numOutputs, int numHiddenLayers, int numNeuronsPerHiddenLayer) {
+
+        mSigmoidSlope = 1;
 
         // Generate input layer.
 
@@ -81,8 +86,8 @@ public class NeuralNet {
 
     /** Sigmoid function used to generate output for each neuron */
 
-    public static float Sigmoid(float a) {
-        return (float)(1 / (1 + Math.pow(Math.E, 100 * a * -1)));
+    public float Sigmoid(float a) {
+        return (float)(1 / (1 + Math.pow(Math.E, a * -1 / mSigmoidSlope)));
     }
 
     /** Get an array of all weights in hidden layers */
@@ -99,6 +104,12 @@ public class NeuralNet {
         }
 
         return weights;
+    }
+
+    /** Set sigmoid slope */
+
+    public void setSigmoidSlope(float slope) {
+        mSigmoidSlope = slope;
     }
 
     /** Set weights of all connections */

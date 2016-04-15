@@ -14,6 +14,10 @@ import danquinndesign.com.smartsweepers.objects.SweepersScene;
 public class SweepersView extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = "SweepersView";
 
+    /** Dimensions */
+    private int mWidth;
+    private int mHeight;
+
     /** Sweepers scene instance */
     private SweepersScene mSweepersScene;
 
@@ -38,24 +42,41 @@ public class SweepersView extends SurfaceView implements SurfaceHolder.Callback 
     /** Genreate next generation */
 
     private void init() {
-        mSweepersScene = new SweepersScene();
         getHolder().addCallback(this);
+        mWidth = 0;
+        mHeight = 0;
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
+        createScene();
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder surfaceHolder, int format, int width, int height) {
+        mWidth = width;
+        mHeight = height;
+        mSweepersScene.setDimensions(mWidth, mHeight);
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+        stopThread();
+    }
+
+    /** Create scene */
+
+    public void createScene() {
+        mSweepersScene = new SweepersScene();
+        mSweepersScene.setDimensions(mWidth, mHeight);
         mSweepersThread = new SweepersThread(getHolder(), mSweepersScene);
         mSweepersThread.setRunning(true);
         mSweepersThread.start();
     }
 
-    @Override
-    public void surfaceChanged(SurfaceHolder surfaceHolder, int format, int width, int height) {
-        mSweepersScene.setDimensions(width, height);
-    }
+    /** Stop thread */
 
-    @Override
-    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+    public void stopThread() {
         mSweepersThread.setRunning(false);
         boolean retry = true;
         while (retry) {

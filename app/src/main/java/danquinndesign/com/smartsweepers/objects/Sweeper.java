@@ -22,6 +22,12 @@ public class Sweeper {
     private float mX;
     private float mY;
 
+    /** Rotation, controls direction of movement */
+    private float mRotation;
+
+    /** How fast the sweeper moves */
+    private float mSpeed;
+
     /** Dimensions of sweeper */
     private float mWidth;
     private float mHeight;
@@ -39,8 +45,11 @@ public class Sweeper {
          * Output is number between -1 and 1 which determines rotation.
          */
 
-        mNeuralNet = new NeuralNet(2, 2, 2, 3);
+        mNeuralNet = new NeuralNet(3, 1, 1, 4);
+        mNeuralNet.setSigmoidSlope(0.1f);
 
+        mRotation = 0;
+        mSpeed = 4;
         mX = 0;
         mY = 0;
         mFitness = 0;
@@ -52,7 +61,7 @@ public class Sweeper {
 
     /** Update direction based on distance from nearest mine */
 
-    public void react(ArrayList<Mine> mines, float width, float height) {
+    public void react(ArrayList<Mine> mines) {
         double minDist = 1000000;
         Mine closestMine = mines.get(0);
 
@@ -66,13 +75,22 @@ public class Sweeper {
             }
         }
 
-        float[] inputs = { mX - closestMine.getX(), mY - closestMine.getY() };
+        float[] inputs = { mRotation, mX - closestMine.getX(), mY - closestMine.getY() };
         float[] outputs = mNeuralNet.getOutput(inputs);
 
-        float moveX = outputs[0] * 10 - 5;
-        float moveY = outputs[1] * 10 - 5;
+        mRotation = outputs[0] * 360 - 180;
 
-        move(mX + moveX, mY + moveY);
+        float dirX = (float)Math.cos(Math.toRadians((double)mRotation));
+        float dirY = (float)Math.sin(Math.toRadians((double)mRotation));
+
+        // Normalize direction vector
+
+        float dirLength = (float)Math.sqrt(dirX * dirX + dirY * dirY);
+
+        dirX = dirX / dirLength;
+        dirY = dirY / dirLength;
+
+        move(mX + dirX * mSpeed, mY + dirY * mSpeed);
     }
 
     /** Move sweeper */

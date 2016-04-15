@@ -9,7 +9,7 @@ import danquinndesign.com.smartsweepers.objects.SweepersScene;
 /**
  * Handles drawing loop
  */
-public class SweepersThread extends Thread {
+public class SweepersThread extends Thread implements Runnable {
     private static final String TAG = "SweepersThread";
 
     /** Shoot for 60 frames per second */
@@ -58,9 +58,7 @@ public class SweepersThread extends Thread {
 
                 synchronized (mSurfaceHolder) {
                     mSweepersScene.update();
-                    if (canvas != null) {
-                        mSweepersScene.draw(canvas);
-                    }
+                    mSweepersScene.draw(canvas);
                 }
             } finally {
                 if (canvas != null) {
