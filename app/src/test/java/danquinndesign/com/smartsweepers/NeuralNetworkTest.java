@@ -42,8 +42,8 @@ public class NeuralNetworkTest {
         float[] outputs = net.getOutput(inputs);
         for (float output: outputs) { System.out.println(output); }
 
-        inputs[0] = (float)-0.5;
-        inputs[1] = (float)-0.5;
+        inputs[0] = -0.5f;
+        inputs[1] = -0.5f;
         outputs = net.getOutput(inputs);
         for (float output: outputs) { System.out.println(output); }
 
@@ -52,8 +52,8 @@ public class NeuralNetworkTest {
         outputs = net.getOutput(inputs);
         for (float output: outputs) { System.out.println(output); }
 
-        inputs[0] = (float)0.5;
-        inputs[1] = (float)0.5;
+        inputs[0] = 0.5f;
+        inputs[1] = 0.5f;
         outputs = net.getOutput(inputs);
         for (float output: outputs) { System.out.println(output); }
 
@@ -61,6 +61,12 @@ public class NeuralNetworkTest {
         inputs[1] = 1;
         outputs = net.getOutput(inputs);
         for (float output: outputs) { System.out.println(output); }
+
+        System.out.println(net.Sigmoid(-1));
+        System.out.println(net.Sigmoid(-0.5f));
+        System.out.println(net.Sigmoid(0));
+        System.out.println(net.Sigmoid(0.5f));
+        System.out.println(net.Sigmoid(1));
 
         assertEquals(1, outputs.length);
     }

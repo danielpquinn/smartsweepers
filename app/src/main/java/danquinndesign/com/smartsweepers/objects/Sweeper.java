@@ -45,8 +45,8 @@ public class Sweeper {
          * Output is number between -1 and 1 which determines rotation.
          */
 
-        mNeuralNet = new NeuralNet(3, 1, 1, 4);
-        mNeuralNet.setSigmoidSlope(0.1f);
+        mNeuralNet = new NeuralNet(3, 1, 2, 3);
+        mNeuralNet.setSigmoidSlope(0.5f);
 
         mRotation = 0;
         mSpeed = 4;
@@ -78,7 +78,7 @@ public class Sweeper {
         float[] inputs = { mRotation, mX - closestMine.getX(), mY - closestMine.getY() };
         float[] outputs = mNeuralNet.getOutput(inputs);
 
-        mRotation = outputs[0] * 360 - 180;
+        mRotation = outputs[0] * 360;
 
         float dirX = (float)Math.cos(Math.toRadians((double)mRotation));
         float dirY = (float)Math.sin(Math.toRadians((double)mRotation));
@@ -107,7 +107,7 @@ public class Sweeper {
         ArrayList<Float> newWeights = new ArrayList();
 
         for (Float weight: weights) {
-            newWeights.add(Math.random() < 0.01 ? (float)Math.random() : weight);
+            newWeights.add(Math.random() < 0.1 ? (float)Math.random() : weight);
         }
 
         mNeuralNet.setWeights(newWeights);

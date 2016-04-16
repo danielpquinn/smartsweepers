@@ -7,8 +7,6 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Manages scene objects and does main render loop
@@ -16,8 +14,8 @@ import java.util.TimerTask;
 public class SweepersScene {
     private static final String TAG = "SweepersScene";
 
-    private static final int NUM_SWEEPERS = 50;
-    private static final int NUM_MINES= 10;
+    private static final int NUM_SWEEPERS = 20;
+    private static final int NUM_MINES= 40;
     private static final int BG_COLOR = Color.parseColor("#00ABB2");
 
     /** List of sweepers */
@@ -33,27 +31,12 @@ public class SweepersScene {
     private int mWidth;
     private int mHeight;
 
-    /** Current generation */
-    private int mGeneration;
-
-    /** New generation timer */
-
-    private class GenerationTimer extends TimerTask {
-        private SweepersScene mScene;
-
-        public GenerationTimer(SweepersScene scene) {
-            mScene = scene;
-        }
-
-        public void run() {
-            mScene.nextGeneration();
-        }
-    }
+    /** Sigmoid slope to initialize populations with */
+    private float mSigmoidSlope = 0.5f;
 
     public SweepersScene() {
         mSweepers = new ArrayList();
         mMines = new ArrayList();
-        mGeneration = 0;
 
         for (int i = 0; i < NUM_MINES; i += 1) {
             Mine mine = new Mine();
@@ -65,9 +48,6 @@ public class SweepersScene {
             mSweepers.add(sweeper);
             sweeper.move((int)(Math.random() * mWidth), (int)(Math.random() * mHeight));
         }
-
-        Timer timer = new Timer();
-        timer.schedule(new GenerationTimer(this), 0, 20000);
     }
 
     /** Update positions of sweepers */
@@ -146,7 +126,7 @@ public class SweepersScene {
 
         // Create new new individuals from fittest members of population
 
-        for (int i = 0; i < mSweepers.size() - 2; i += 1) {
+        for (int i = 0; i < mSweepers.size() - 4; i += 1) {
             Sweeper s1 = mSweepers.get((int)Math.floor(Math.random() * mSweepers.size() * Math.random()));
             Sweeper s2 = mSweepers.get((int)Math.floor(Math.random() * mSweepers.size() * Math.random()));
             Sweeper newSweeper = combineSweepers(s1, s2);
@@ -158,6 +138,8 @@ public class SweepersScene {
 
         newSweepers.add(mSweepers.get(0));
         newSweepers.add(mSweepers.get(1));
+        newSweepers.add(mSweepers.get(2));
+        newSweepers.add(mSweepers.get(3));
 
         // Mutate sweeper's weights randomly to introduce new behavior
 
@@ -167,7 +149,7 @@ public class SweepersScene {
 
         mSweepers = newSweepers;
 
-        mGeneration += 1;
+        setSigmoidSlopes(mSigmoidSlope);
     }
 
     /** Combine two sweepers */
@@ -212,9 +194,12 @@ public class SweepersScene {
         mMineQuadTree = new MineQuadTree(0, 0, mWidth, mHeight, mMines);
     }
 
-    /** Getters and setters */
+    /** Set sigmoid slope for all neural nets */
 
-    public int getGeneration() {
-        return mGeneration;
+    public void setSigmoidSlopes(float slope) {
+        mSigmoidSlope = slope;
+        for(Sweeper sweeper: mSweepers) {
+            sweeper.getNeuralNet().setSigmoidSlope(mSigmoidSlope);
+        }
     }
 }
